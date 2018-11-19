@@ -26,12 +26,33 @@ public class Rocket : MonoBehaviour {
         Rotate();
     }
 
+    void OnCollisionEnter(Collision collision)
+    {
+        print("Rocket Collided");
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                //do nothing
+                print("Hey, you're OK!");
+                break;
+            case "Fuel":
+                print("Fuel");
+                break;
+            default:
+                print("X DEAD X");
+                //Kill the Player
+                break;
+
+        }
+    }
+
+
     private void Thrust()
     {
         float thrustThisFrame = mainThrust * Time.deltaTime;
         if (Input.GetKey(KeyCode.Space))
         {
-            print("Thrusting"); // can thrust while rotating
+          
             rigidBody.AddRelativeForce(Vector3.up * thrustThisFrame);
             if (!rocketThrustSound.isPlaying)
             {
@@ -53,12 +74,12 @@ public class Rocket : MonoBehaviour {
 
         if (Input.GetKey(KeyCode.A))
         {
-            print("Rocket Rotate LEFT");
+            
             transform.Rotate(Vector3.forward * rotationThisFrame);
         }
         else if (Input.GetKey(KeyCode.D))
         {
-            print("Rocket Rotate RIGHT");
+         
             transform.Rotate(-Vector3.forward * rotationThisFrame);
         }
 
