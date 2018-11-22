@@ -8,6 +8,8 @@ public class Rocket : MonoBehaviour {
     [SerializeField] float rcsThrust = 100f;
     [SerializeField] float mainThrust = 100f;
 
+    enum State { Alive, Dying, Transcending }
+    State state = State.Alive; 
 
     Rigidbody rigidBody;
     AudioSource rocketThrustSound;
@@ -22,38 +24,50 @@ public class Rocket : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        Thrust();
-        Rotate();
+        if (state == State.Alive)
+        {
+            Thrust();
+            Rotate();
+        }
+       
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        print("Rocket Collided");
+        if (state != State.Alive) { return };
+        
         switch (collision.gameObject.tag)
         {
             case "Friendly":
                 //do nothing
                 break;
             case "Finish":
-                print("Hit Finish");
-                SceneManager.LoadScene(1);
+                state = State.Transcending;
+                Invoke("LoadNextLevel", 1f);
                 break;
             default:
-                print("X DEAD X");
-                SceneManager.LoadScene(0);
+                state = State.Dying;
+                Invoke("LoadFirstLevel", 1f);
                 //Kill the Player
                 break;
-
         }
     }
 
+    private void LoadNextLevel()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);
+    }
 
     private void Thrust()
     {
         float thrustThisFrame = mainThrust * Time.deltaTime;
         if (Input.GetKey(KeyCode.Space))
         {
-          
             rigidBody.AddRelativeForce(Vector3.up * thrustThisFrame);
             if (!rocketThrustSound.isPlaying)
             {
@@ -70,7 +84,6 @@ public class Rocket : MonoBehaviour {
     {
         rigidBody.freezeRotation = true; // take manual control of rotation
 
-       
         float rotationThisFrame = rcsThrust * Time.deltaTime;
 
         if (Input.GetKey(KeyCode.A))
