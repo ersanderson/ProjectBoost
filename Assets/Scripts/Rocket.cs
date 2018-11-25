@@ -7,6 +7,8 @@ public class Rocket : MonoBehaviour {
 
     [SerializeField] float rcsThrust = 100f;
     [SerializeField] float mainThrust = 100f;
+    [SerializeField] float levelLoadDelay = 2f;
+
     [SerializeField] AudioClip mainEngine;
     [SerializeField] AudioClip success;
     [SerializeField] AudioClip death;
@@ -63,7 +65,7 @@ public class Rocket : MonoBehaviour {
         audioSource.Stop();
         audioSource.PlayOneShot(success);
         successParticles.Play();
-        Invoke("LoadNextLevel", 1f);
+        Invoke("LoadNextLevel", levelLoadDelay);
     }
 
     private void StartDeathSequence()
@@ -72,7 +74,7 @@ public class Rocket : MonoBehaviour {
         audioSource.Stop();
         deathParticles.Play();
         audioSource.PlayOneShot(death);
-        Invoke("LoadFirstLevel", 1f);
+        Invoke("LoadFirstLevel", levelLoadDelay);
         //Kill the Player
     }
 
@@ -92,13 +94,17 @@ public class Rocket : MonoBehaviour {
         {
             ApplyThrust();
         }
-        else
+        else if (Input.GetKey(KeyCode.S))
+        {
+            ApplyReverseThrust();
+        }
+        else 
         {
             audioSource.Stop();
             mainEnginePartilces.Stop();
-
         }
     }
+
 
     private void ApplyThrust()
     {
@@ -109,6 +115,16 @@ public class Rocket : MonoBehaviour {
             audioSource.PlayOneShot(mainEngine);
         }
         mainEnginePartilces.Play();
+    }
+
+    private void ApplyReverseThrust()
+    {
+        float thrustThisFrame = mainThrust * Time.deltaTime;
+        rigidBody.AddRelativeForce(-Vector3.up * (thrustThisFrame / 5f));
+        if (!audioSource.isPlaying)
+        {
+            audioSource.PlayOneShot(mainEngine);
+        }
     }
 
     private void RespondToRotateInput()
