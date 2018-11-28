@@ -7,6 +7,7 @@ public class Rocket : MonoBehaviour {
 
     [SerializeField] float rcsThrust = 100f;
     [SerializeField] float mainThrust = 100f;
+    [SerializeField] float revThrustDamp = 6f;
     [SerializeField] float levelLoadDelay = 2f;
 
     [SerializeField] AudioClip mainEngine;
@@ -14,10 +15,12 @@ public class Rocket : MonoBehaviour {
     [SerializeField] AudioClip death;
 
     [SerializeField] ParticleSystem mainEnginePartilces;
+    [SerializeField] ParticleSystem reverseParticlesLeft;
+    [SerializeField] ParticleSystem reverseParticlesRight;
     [SerializeField] ParticleSystem successParticles;
     [SerializeField] ParticleSystem deathParticles;
 
-
+   
 
     enum State { Alive, Dying, Transcending }
     State state = State.Alive; 
@@ -92,16 +95,23 @@ public class Rocket : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.Space))
         {
+
+            reverseParticlesLeft.Stop();
+            reverseParticlesRight.Stop();
             ApplyThrust();
         }
         else if (Input.GetKey(KeyCode.S))
         {
+            mainEnginePartilces.Stop();
             ApplyReverseThrust();
         }
         else 
         {
             audioSource.Stop();
             mainEnginePartilces.Stop();
+            reverseParticlesLeft.Stop();
+            reverseParticlesRight.Stop();
+
         }
     }
 
@@ -120,11 +130,13 @@ public class Rocket : MonoBehaviour {
     private void ApplyReverseThrust()
     {
         float thrustThisFrame = mainThrust * Time.deltaTime;
-        rigidBody.AddRelativeForce(-Vector3.up * (thrustThisFrame / 5f));
+        rigidBody.AddRelativeForce(-Vector3.up * (thrustThisFrame / revThrustDamp));
         if (!audioSource.isPlaying)
         {
             audioSource.PlayOneShot(mainEngine);
         }
+        reverseParticlesLeft.Play();
+        reverseParticlesRight.Play();
     }
 
     private void RespondToRotateInput()
